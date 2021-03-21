@@ -15,8 +15,8 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         // $data = $this -> getData();
-        $data = DB::table('sql_teams') -> get();
-        dump($data);
+        $data = DB::table('sbl_teams') -> get();
+        dump('123: ', $data);
         return response($data);
     }
 
