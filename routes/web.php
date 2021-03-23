@@ -18,6 +18,7 @@ Route::get('/', function () {
 });
 // Route::post('/', 'ProductController@create');
 Route::resource('products', 'ProductController');
+Route::resource('carts', 'CarController');
 
 // group 可以將同一路徑功能結合在同一群組裡
 /*
