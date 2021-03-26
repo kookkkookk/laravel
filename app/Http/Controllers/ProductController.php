@@ -14,9 +14,11 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        // $data = $this -> getData();
-        $data = DB::table('products') -> get();
-        return response($data);
+        // increment 該 data row 增加多少值, 第2參數沒填則是1
+        DB::table('sbl_team_data') -> where('id', 532) -> increment('win', 2000);
+        // decrement 該 data row 減少多少值, 第2參數沒填則是1
+        DB::table('sbl_team_data') -> where('id', 533) -> decrement('win');
+        return response(123);
     }
 
     public function getData()
