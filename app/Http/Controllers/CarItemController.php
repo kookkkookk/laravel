@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator; // 檢查參數用 (Validator)
+use App\Http\Requests\UpdateCartItem;
 
 class CarItemController extends Controller
 {
@@ -34,13 +36,28 @@ class CarItemController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request) // store, 就是 POST 會進來的 function
-    {
-        $form = $request -> all(); // 這邊 $request 就是收到前端來的值
-        // dd('$form: ', $form);
+    {   
+        // 把要檢查的參數放到裡面
+        $massages = [
+            'required' => ':attribute 為必填', // :attribute 為該 key
+            'integer' => ':attribute 必須為數字',
+            'between' => ':attribute 您購買的數量為 :input 項，最少購買 :min 項 ; 最多購買 :max 項', // 回傳 err 訊息各種特別參數都有特別的:命名，請參考官方文件
+        ];
+        $validator = Validator::make($request -> all(), [
+            'cart_id' => 'required|integer', // required 指一定需要該參數，| 或 (就是指可以有複數規則)，integer 一定要數字類型
+            'product_id' => 'required|integer',
+            'quantity' => 'required|integer|between:1,10', // between:最小直,最大值
+        ], $massages); 
+        if ($validator -> fails()) {  // fails() 如果 Validator::make 沒通過的 key 會加到 fails, 就可以被 fails() 呼叫到
+            return response($validator -> errors(), 400); // 將 $validator 依 errors() 傳出去
+        }
+
+        $validatedData = $validator -> validate(); // 如果驗證成功 $validator 呼叫 validate() 把參數回傳至到新變數上
+        dd($validatedData);
         DB::table('cart_items') -> insert([
-            'cart_id' => $form['cart_id'],
-            'product_id' => $form['product_id'],
-            'quantity' => $form['quantity'],
+            'cart_id' => $validatedData['cart_id'],
+            'product_id' => $validatedData['product_id'],
+            'quantity' => $validatedData['quantity'],
             'created_at' => now(),
             'updated_at' => now()
         ]);
@@ -70,16 +87,9 @@ class CarItemController extends Controller
         //
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id) // update, 就是 PUT/PATCH 會進來的 function; $id 前端網址帶上的id
+    public function update(UpdateCartItem $request, $id) // 將 Request 換成自定義的 Validation UpdateCartItem
     {
-        $form = $request -> all(); // 這邊 $request 就是收到前端來的值
+        $form = $request -> validated(); // 因為上面已經使用 Validation 的 request 所以這邊可以使用 validated() 呼叫成功驗證後的資料
         DB::table('cart_items') -> where('id', $id) -> update([ // where 尋找要被改的id; update 更新該 table 資料
             'quantity' => $form['quantity'],
             'updated_at' => now() // 只更新 updated_at 的時間
