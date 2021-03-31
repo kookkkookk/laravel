@@ -12,10 +12,13 @@ class Authenticate extends Middleware
      * @param  \Illuminate\Http\Request  $request
      * @return string|null
      */
+    /*
+    // 主要是做授權不通過的 redirect
     protected function redirectTo($request)
     {
         if (! $request->expectsJson()) {
-            return route('login');
+            return route('login'); // 導到 login 頁
         }
     }
+    */
 }
