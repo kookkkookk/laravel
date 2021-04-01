@@ -29,10 +29,29 @@ class CarController extends Controller
         
         // firstOrCreate() 是Get該資料，但如果目前沒有就會產生一筆資料進去該 Table 格式只有單純 [id, created_at, updated_at]
         // with([該目前表單的關聯]) 這樣就會撈出該 關聯的data
-        $cart = Cart::with(['cartItems']) -> firstOrCreate();
+        // $cart = Cart::with(['cartItems']) -> firstOrCreate();
+
+        $user = auth() -> user();
+        // 這邊因為串接了 user, 改成查看每一個個人 user_id 的購物車內容, 如果沒有則就建立第一筆該 user 自己的 carts: data row
+        $cart = Cart::with(['cartItems']) -> where('user_id', $user -> id) -> firstOrCreate([
+            'user_id' => $user -> id
+        ]);
+        
         
         return response($cart);
 
+    }
+
+    public function checkout() {
+        $user = auth() -> user();
+        // with() 可以減少效能消耗，會預先執行 lazyload 該 table, 撈取時候會比較快
+        $cart = $user -> carts() -> where('checkouted', false) -> with('cartItems') -> first();
+        if ($cart) {
+            $result = $cart -> checkout();
+            return response($result);
+        } else {
+            return response('沒有購物車', 400);
+        }
     }
 
     /**

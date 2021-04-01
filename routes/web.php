@@ -21,8 +21,6 @@ Route::resource('products', 'ProductController');
 // Route::group(['middleware' => 'check.dirty'], function() {
 //     Route::resource('products', 'ProductController');
 // });
-Route::resource('carts', 'CarController');
-Route::resource('cart-items', 'CarItemController');
 // 客製化路由，一般 post 會走@store, 但這裡 method 指定 post 進來的話會走 @signup 這個 function
 Route::post('signup', 'AuthController@signup');
 Route::post('login', 'AuthController@login');
@@ -30,6 +28,9 @@ Route::post('login', 'AuthController@login');
 Route::group(['middleware' => 'auth:api'], function() {
     Route::get('user', 'AuthController@user');
     Route::get('logout', 'AuthController@logout'); // 登出也是一定要受登入狀態保護，所以也在這裡面
+    Route::post('carts/checkout', 'CarController@checkout');
+    Route::resource('carts', 'CarController');
+    Route::resource('cart-items', 'CarItemController');
 });
 
 // group 可以將同一路徑功能結合在同一群組裡
